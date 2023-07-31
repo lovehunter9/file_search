@@ -15,9 +15,9 @@ import (
 	"wzinc/parser"
 	"wzinc/rpc"
 
-	"bytetrade.io/web3os/fs-lib/jfsnotify"
+	//"bytetrade.io/web3os/fs-lib/jfsnotify"
 
-	// "github.com/fsnotify/fsnotify"
+	jfsnotify "github.com/fsnotify/fsnotify"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
@@ -27,7 +27,8 @@ var watcher *jfsnotify.Watcher
 func WatchPath(path string) {
 	// Create a new watcher.
 	var err error
-	watcher, err = jfsnotify.NewWatcher("myWatcher")
+	//watcher, err = jfsnotify.NewWatcher("myWatcher")
+	watcher, err = jfsnotify.NewWatcher()
 	if err != nil {
 		panic(err)
 	}
@@ -128,6 +129,7 @@ func dedupLoop(w *jfsnotify.Watcher) {
 }
 
 func handleEvent(e jfsnotify.Event) error {
+	fmt.Println(e)
 	if e.Has(jfsnotify.Remove) || e.Has(jfsnotify.Rename) {
 		log.Info().Msgf("push indexer task delete %s", e.Name)
 		VectorCli.fsTask <- VectorDBTask{
@@ -249,6 +251,13 @@ func updateOrInputDoc(filepath string) error {
 	}
 
 	log.Debug().Msgf("no history doc, add new")
+	fmt.Println(filepath)
+	if !IsDir(filepath) {
+		uploadFileId := UploadFile(filepath)
+		if uploadFileId != "" {
+			DatasetsDocument(uploadFileId)
+		}
+	}
 	//path not exist input doc
 	f, err := os.Open(filepath)
 	if err != nil {
