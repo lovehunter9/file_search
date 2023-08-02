@@ -82,9 +82,9 @@ func GetDifyHeaders() {
 	}
 
 	body.Email = os.Getenv("DIFY_USER_EMAIL")
-	body.Password = os.Getenv("DFIY_USER_PASSWORD")
+	body.Password = os.Getenv("DIFY_USER_PASSWORD")
 	body.RememberMe = true
-
+	
 	headers := make(map[string]string)
 
 	_, _, respHeader, _ := JSONWithResp("http://localhost/console/api/login",
@@ -209,8 +209,8 @@ func postFile(filename string, target_url string, headers map[string]string) (*h
 			req.Header.Set(key, value)
 		}
 	}
-	fmt.Println(req.Header)
-	fmt.Println(req.Body)
+	//fmt.Println(req.Header)
+	//fmt.Println(req.Body)
 	return http.DefaultClient.Do(req)
 }
 
@@ -222,8 +222,8 @@ func UploadFile(fileName string) (fileId string) {
 
 	statusCode := resp.StatusCode
 	respBody, _ := ioutil.ReadAll(resp.Body)
-	respHeader := resp.Header
-	fmt.Println(statusCode, string(respBody), respHeader)
+	//respHeader := resp.Header
+	//fmt.Println(statusCode, string(respBody), respHeader)
 
 	if statusCode != 201 {
 		return ""
@@ -332,13 +332,14 @@ func DatasetsDocument(fileId string) {
 	body.DataSource.InfoList.FileInfoList.FileIds = []string{fileId}
 	body.ProcessRule.Mode = "automatic"
 
-	statusCode, respBody, respHeader, _ := JSONWithResp("http://localhost/console/api/datasets/"+datasetId+"/documents",
+	// statusCode, respBody, respHeader, _ :=
+	_, _, _, _ = JSONWithResp("http://localhost/console/api/datasets/"+datasetId+"/documents",
 		"POST",
 		difyHeaders,
 		body,
 		time.Duration(time.Second*10))
 
-	fmt.Println(statusCode, respHeader, string(respBody))
+	//fmt.Println(statusCode, respHeader, string(respBody))
 
 	//var myRespBody map[string]interface{}
 	//err := json.Unmarshal([]byte(respBody), &myRespBody)
@@ -354,4 +355,60 @@ func IsDir(path string) bool {
 		return false
 	}
 	return s.IsDir()
+}
+
+func IsFileExist(path string) bool {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	return false
+}
+
+func DatasetsSearchDocument(fileName string) (fileIds []string) {
+	// statusCode, respBody, respHeader, _ :=
+	_, respBody, _, _ := JSONWithResp("http://localhost/console/api/datasets/"+datasetId+"/documents",
+		"GET",
+		difyHeaders,
+		nil,
+		time.Duration(time.Second*10))
+
+	//fmt.Println(statusCode, respHeader, string(respBody))
+
+	var myRespBody map[string]interface{}
+	err := json.Unmarshal([]byte(respBody), &myRespBody)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//fmt.Println(myRespBody["data"])
+	datasets := myRespBody["data"].([]interface{})
+	//fmt.Println(datasets)
+	fileIds = []string{}[:]
+	for _, value := range datasets {
+		valueTmp := value.(map[string]interface{})
+		if valueTmp["name"].(string) == fileName {
+			fileIds = append(fileIds, valueTmp["id"].(string))
+		}
+	}
+	return
+}
+
+func DatasetsDeleteDocument(fileName string) {
+	fileIds := DatasetsSearchDocument(fileName)
+	for _, fileId := range fileIds {
+		if fileId != "" {
+			//statusCode, respBody, respHeader, _ :=
+			_, _, _, _ = JSONWithResp("http://localhost/console/api/datasets/"+datasetId+"/documents/"+fileId,
+				"DELETE",
+				difyHeaders,
+				nil,
+				time.Duration(time.Second*10))
+
+			//fmt.Println(statusCode, respHeader, string(respBody))
+		}
+	}
+	return
 }

@@ -96,18 +96,31 @@ func dedupLoop(w *jfsnotify.Watcher) {
 				log.Warn().Msg("watcher event channel closed")
 				return
 			}
+			if e.Has(jfsnotify.Chmod) {
+				continue
+			}
 			log.Debug().Msgf("pending event %v", e)
 			// Get timer.
 			mu.Lock()
-			pendingEvent[e.Name] = e
+			_, ok = pendingEvent[e.Name]
+			if !ok {
+				pendingEvent[e.Name] = e
+			} else {
+				var temp jfsnotify.Event
+				temp.Name = e.Name
+				temp.Op = pendingEvent[e.Name].Op | e.Op
+				pendingEvent[e.Name] = temp
+			}
 			t, ok := timers[e.Name]
 			mu.Unlock()
+			fmt.Println("\n\n", pendingEvent, "\n\n")
 
 			// No timer yet, so create one.
 			if !ok {
 				t = time.AfterFunc(math.MaxInt64, func() {
 					mu.Lock()
 					ev := pendingEvent[e.Name]
+					fmt.Println("\n\n", ev, "\n\n")
 					mu.Unlock()
 					printEvent(ev)
 					err := handleEvent(ev)
@@ -129,7 +142,22 @@ func dedupLoop(w *jfsnotify.Watcher) {
 }
 
 func handleEvent(e jfsnotify.Event) error {
-	fmt.Println(e)
+	fmt.Println(e.Name, e.Op, e)
+	if e.Has(jfsnotify.Remove) || e.Has(jfsnotify.Rename) {
+		DatasetsDeleteDocument(path.Base(e.Name))
+	}
+	if e.Has(jfsnotify.Create) || e.Has(jfsnotify.Write) {
+		if !IsDir(e.Name) && IsFileExist(e.Name) {
+			fileIds := DatasetsSearchDocument(path.Base(e.Name))
+			if len(fileIds) == 0 {
+				uploadFileId := UploadFile(e.Name)
+				if uploadFileId != "" {
+					DatasetsDocument(uploadFileId)
+				}
+			}
+		}
+	}
+
 	if e.Has(jfsnotify.Remove) || e.Has(jfsnotify.Rename) {
 		log.Info().Msgf("push indexer task delete %s", e.Name)
 		VectorCli.fsTask <- VectorDBTask{
@@ -159,7 +187,7 @@ func handleEvent(e jfsnotify.Event) error {
 		return nil
 	}
 
-	if e.Has(jfsnotify.Create) || e.Has(jfsnotify.Write) || e.Has(jfsnotify.Chmod) {
+	if e.Has(jfsnotify.Create) || e.Has(jfsnotify.Write) { // || e.Has(jfsnotify.Chmod) {
 		err := filepath.Walk(e.Name, func(docPath string, info fs.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -225,7 +253,7 @@ func updateOrInputDoc(filepath string) error {
 			//doc changed
 			fileType := parser.GetTypeFromName(filepath)
 			if _, ok := parser.ParseAble[fileType]; ok {
-				log.Info().Msgf("push indexer task insert %s", filepath)
+				log.Info().Msgf("push indexer task update %s", filepath)
 				VectorCli.fsTask <- VectorDBTask{
 					Filename:  path.Base(filepath),
 					Filepath:  filepath,
@@ -251,13 +279,6 @@ func updateOrInputDoc(filepath string) error {
 	}
 
 	log.Debug().Msgf("no history doc, add new")
-	fmt.Println(filepath)
-	if !IsDir(filepath) {
-		uploadFileId := UploadFile(filepath)
-		if uploadFileId != "" {
-			DatasetsDocument(uploadFileId)
-		}
-	}
 	//path not exist input doc
 	f, err := os.Open(filepath)
 	if err != nil {
