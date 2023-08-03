@@ -84,7 +84,7 @@ func GetDifyHeaders() {
 	body.Email = os.Getenv("DIFY_USER_EMAIL")
 	body.Password = os.Getenv("DIFY_USER_PASSWORD")
 	body.RememberMe = true
-	
+
 	headers := make(map[string]string)
 
 	_, _, respHeader, _ := JSONWithResp("http://localhost/console/api/login",
