@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"path"
@@ -30,11 +31,19 @@ func GetTypeFromName(filename string) string {
 
 func ParseDoc(f io.Reader, filename string) (string, error) {
 	fileType := GetTypeFromName(filename)
+
+	fmt.Println(fileType)
+
 	if _, ok := ParseAble[fileType]; !ok {
 		return "", nil
 	}
 	if fileType == ".txt" || fileType == ".md" || fileType == ".markdown" {
 		data, err := ioutil.ReadAll(f)
+		if string(data) != "" {
+			fmt.Println(data)
+		} else {
+			fmt.Println("Read fucking nothing!")
+		}
 		if err != nil {
 			return "", err
 		}

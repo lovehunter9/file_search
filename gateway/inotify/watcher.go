@@ -218,10 +218,16 @@ func handleEvent(e jfsnotify.Event) error {
 func updateOrInputDoc(filepath string) error {
 	log.Debug().Msg("try update or input" + filepath)
 	res, err := rpc.RpcServer.ZincQueryByPath(rpc.FileIndex, filepath)
+
+	fmt.Println(res)
+
 	if err != nil {
 		return err
 	}
 	docs, err := rpc.GetFileQueryResult(res)
+
+	fmt.Println(docs)
+
 	if err != nil {
 		return err
 	}
@@ -291,6 +297,9 @@ func updateOrInputDoc(filepath string) error {
 	}
 	md5 := common.Md5File(bytes.NewReader(b))
 	fileType := parser.GetTypeFromName(filepath)
+
+	fmt.Println(md5, fileType)
+
 	content := ""
 	if _, ok := parser.ParseAble[fileType]; ok {
 		log.Info().Msgf("push indexer task insert %s", filepath)
@@ -304,9 +313,13 @@ func updateOrInputDoc(filepath string) error {
 			FileId:    fileId(filepath),
 		}
 		content, err = parser.ParseDoc(bytes.NewBuffer(b), filepath)
+
 		if err != nil {
+			fmt.Println(err.Error())
 			return err
 		}
+
+		fmt.Println(content)
 	}
 	filename := path.Base(filepath)
 	size := 0
@@ -324,7 +337,13 @@ func updateOrInputDoc(filepath string) error {
 		"updated":     time.Now().Unix(),
 		"format_name": rpc.FormatFilename(filename),
 	}
+
+	fmt.Println(doc)
+
 	id, err := rpc.RpcServer.ZincInput(rpc.FileIndex, doc)
+
+	fmt.Println(id)
+
 	log.Debug().Msgf("zinc input doc id %s path %s", id, filepath)
 	return err
 }
