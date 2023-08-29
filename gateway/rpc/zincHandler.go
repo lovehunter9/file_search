@@ -86,7 +86,7 @@ func (s *Service) HandleFileInput(c *gin.Context) {
 	}
 
 	log.Info().Msgf("add input file index %s doc %v", index, doc)
-	id, err := s.ZincInput(index, doc)
+	id, err := s.EsInput(index, doc)
 	if err != nil {
 		rep.ResultCode = ErrorCodeInput
 		rep.ResultMsg = err.Error()
@@ -118,7 +118,7 @@ func (s *Service) HandleFileDelete(c *gin.Context) {
 		return
 	}
 	log.Info().Msgf("zinc delete index %s docid%s", index, docId)
-	_, err := s.ZincDelete(docId, index)
+	_, err := s.EsDelete(docId, index)
 	if err != nil {
 		rep.ResultCode = ErrorCodeDelete
 		rep.ResultMsg = err.Error()
@@ -156,7 +156,8 @@ func (s *Service) HandleFileQuery(c *gin.Context) {
 		maxResults = DefaultMaxResult
 	}
 	log.Info().Msgf("zinc query index %s term %s max %v", index, term, maxResults)
-	results, err := s.zincQuery(index, term, int32(maxResults))
+	//results, err := s.zincQuery(index, term, int32(maxResults))
+	results, err := s.EsQuery(index, term, maxResults)
 
 	if err != nil {
 		rep.ResultMsg = err.Error()
@@ -205,7 +206,7 @@ func (s *Service) slashFileQueryResult(results []FileQueryResult) []FileQueryIte
 		if os.IsNotExist(err) {
 			//delete if not exist
 			log.Info().Msgf("zinc delete query found but not exist file %s id %s", res.Where, res.DocId)
-			_, err := s.ZincDelete(res.DocId, FileIndex)
+			_, err := s.EsDelete(res.DocId, FileIndex)
 			if err != nil {
 				log.Error().Msgf("zinc delete file error path %s id %s", res.Where, res.DocId)
 			}

@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/go-elasticsearch/v8"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -50,7 +51,9 @@ type Service struct {
 	zincUrl          string
 	username         string
 	password         string
+	esClient         *elasticsearch.TypedClient
 	apiClient        *zinc.APIClient
+	context          context.Context
 	bsApiClient      map[string]*selfdriving.Client //modelname -> client
 	questionCh       chan (common.PendingQuestion)
 	maxPendingLength int
@@ -66,6 +69,9 @@ func InitRpcService(url, port, username, password string, bsModelConfig map[stri
 			},
 		}
 		apiClient := zinc.NewAPIClient(configuration)
+		esClient, _ := InitES(url, username, password)
+		ctxTemp := context.WithValue(context.Background(), "Username", username)
+		ctx := context.WithValue(ctxTemp, "Password", password)
 
 		RpcServer = &Service{
 			port:             port,
@@ -73,13 +79,19 @@ func InitRpcService(url, port, username, password string, bsModelConfig map[stri
 			username:         username,
 			password:         password,
 			apiClient:        apiClient,
+			esClient:         esClient,
+			context:          ctx,
 			bsApiClient:      make(map[string]*selfdriving.Client),
 			questionCh:       make(chan common.PendingQuestion),
 			maxPendingLength: maxPendingLength,
 		}
 
-		//setup zinc index
-		if err := RpcServer.setupIndex(); err != nil {
+		////setup zinc index
+		//if err := RpcServer.setupIndex(); err != nil {
+		//	panic(err)
+		//}
+
+		if err := RpcServer.EsSetupIndex(); err != nil {
 			panic(err)
 		}
 

@@ -40,36 +40,36 @@ func initTestService() Service {
 	}
 }
 
-func TestQueryFile(t *testing.T) {
-	service := initTestService()
-	content, err := service.GetContentByDocId(FileIndex, "8c1ae2c7-33df-455a-870a-a41ee25dbcc0")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(content)
-}
+//func TestQueryFile(t *testing.T) {
+//	service := initTestService()
+//	content, err := service.GetContentByDocId(FileIndex, "8c1ae2c7-33df-455a-870a-a41ee25dbcc0")
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Println(content)
+//}
 
-func TestQueryPath(t *testing.T) {
-	service := initTestService()
-	res, err := service.ZincQueryByPath(FileIndex, "")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%v", res)
-	doc, err := GetFileQueryResult(res)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%v", doc)
-}
+//func TestQueryPath(t *testing.T) {
+//	service := initTestService()
+//	res, err := service.ZincQueryByPath(FileIndex, "")
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Printf("%v", res)
+//	doc, err := GetFileQueryResult(res)
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Printf("%v", doc)
+//}
 
-func TestSetupIndex(t *testing.T) {
-	service := initTestService()
-	err := service.setupIndex()
-	if err != nil {
-		panic(err)
-	}
-}
+//func TestSetupIndex(t *testing.T) {
+//	service := initTestService()
+//	err := service.setupIndex()
+//	if err != nil {
+//		panic(err)
+//	}
+//}
 
 func TestListIndex(t *testing.T) {
 	// indexName := "hightlight"
@@ -227,14 +227,15 @@ func TestClientInput(t *testing.T) {
 	fmt.Fprintf(os.Stdout, "Response from `Document.IndexWithID`: %v\n", resp.GetId())
 }
 
-func TestDelete(t *testing.T) {
-	docId := "id_example123"
-	res, err := RpcServer.ZincDelete(docId, index)
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(string(res))
-}
+//func TestDelete(t *testing.T) {
+//	docId := "id_example123"
+//	res, err := RpcServer.ZincDelete(docId, index)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	fmt.Println(string(res))
+//}
+
 func TestQuery(t *testing.T) {
 	url := zincUrl + "/api/_analyze"
 	req, err := http.NewRequest("POST", url, strings.NewReader(`{

@@ -15,9 +15,9 @@ import (
 	"wzinc/parser"
 	"wzinc/rpc"
 
-	"bytetrade.io/web3os/fs-lib/jfsnotify"
+	//"bytetrade.io/web3os/fs-lib/jfsnotify"
 
-	// "github.com/fsnotify/fsnotify"
+	jfsnotify "github.com/fsnotify/fsnotify"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
@@ -27,7 +27,7 @@ var watcher *jfsnotify.Watcher
 func WatchPath(path string) {
 	// Create a new watcher.
 	var err error
-	watcher, err = jfsnotify.NewWatcher("myWatcher")
+	watcher, err = jfsnotify.NewWatcher() // ("myWatcher")
 	if err != nil {
 		panic(err)
 	}
@@ -95,6 +95,9 @@ func dedupLoop(w *jfsnotify.Watcher) {
 				log.Warn().Msg("watcher event channel closed")
 				return
 			}
+			if e.Has(jfsnotify.Chmod) {
+				continue
+			}
 			log.Debug().Msgf("pending event %v", e)
 			// Get timer.
 			mu.Lock()
@@ -139,25 +142,25 @@ func handleEvent(e jfsnotify.Event) error {
 			StartTime: time.Now().Unix(),
 			FileId:    fileId(e.Name),
 		}
-		res, err := rpc.RpcServer.ZincQueryByPath(rpc.FileIndex, e.Name)
+		res, err := rpc.RpcServer.EsQueryByPath(rpc.FileIndex, e.Name)
 		if err != nil {
 			return err
 		}
-		docs, err := rpc.GetFileQueryResult(res)
+		docs, err := rpc.EsGetFileQueryResult(res)
 		if err != nil {
 			return err
 		}
 		for _, doc := range docs {
-			_, err = rpc.RpcServer.ZincDelete(doc.DocId, rpc.FileIndex)
+			_, err = rpc.RpcServer.EsDelete(doc.DocId, rpc.FileIndex)
 			if err != nil {
 				log.Error().Msgf("zinc delete error %s", err.Error())
 			}
 			log.Debug().Msgf("delete doc id %s path %s", doc.DocId, e.Name)
 		}
-		return nil
+		//return nil
 	}
 
-	if e.Has(jfsnotify.Create) || e.Has(jfsnotify.Write) || e.Has(jfsnotify.Chmod) {
+	if e.Has(jfsnotify.Create) { // || e.Has(jfsnotify.Write) || e.Has(jfsnotify.Chmod) {
 		err := filepath.Walk(e.Name, func(docPath string, info fs.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -182,16 +185,20 @@ func handleEvent(e jfsnotify.Event) error {
 		}
 		return nil
 	}
+
+	if e.Has(jfsnotify.Write) { // || e.Has(notify.Chmod) {
+		return updateOrInputDoc(e.Name)
+	}
 	return nil
 }
 
 func updateOrInputDoc(filepath string) error {
 	log.Debug().Msg("try update or input" + filepath)
-	res, err := rpc.RpcServer.ZincQueryByPath(rpc.FileIndex, filepath)
+	res, err := rpc.RpcServer.EsQueryByPath(rpc.FileIndex, filepath)
 	if err != nil {
 		return err
 	}
-	docs, err := rpc.GetFileQueryResult(res)
+	docs, err := rpc.EsGetFileQueryResult(res)
 	if err != nil {
 		return err
 	}
@@ -202,7 +209,7 @@ func updateOrInputDoc(filepath string) error {
 		if len(docs) > 1 {
 			for _, doc := range docs[1:] {
 				log.Debug().Msgf("delete redundant docid %s path %s", doc.DocId, doc.Where)
-				_, err := rpc.RpcServer.ZincDelete(doc.DocId, rpc.FileIndex)
+				_, err := rpc.RpcServer.EsDelete(doc.DocId, rpc.FileIndex)
 				if err != nil {
 					log.Error().Msgf("zinc delete error %v", err)
 				}
@@ -238,7 +245,7 @@ func updateOrInputDoc(filepath string) error {
 					return err
 				}
 				log.Debug().Msgf("update content from old doc id %s path %s", docs[0].DocId, filepath)
-				_, err = rpc.RpcServer.UpdateFileContentFromOldDoc(rpc.FileIndex, content, newMd5, docs[0])
+				_, err = rpc.RpcServer.EsUpdateFileContentFromOldDoc(rpc.FileIndex, content, newMd5, docs[0])
 				return err
 			}
 			log.Debug().Msgf("doc format not parsable %s", filepath)
@@ -294,7 +301,7 @@ func updateOrInputDoc(filepath string) error {
 		"updated":     time.Now().Unix(),
 		"format_name": rpc.FormatFilename(filename),
 	}
-	id, err := rpc.RpcServer.ZincInput(rpc.FileIndex, doc)
+	id, err := rpc.RpcServer.EsInput(rpc.FileIndex, doc)
 	log.Debug().Msgf("zinc input doc id %s path %s", id, filepath)
 	return err
 }

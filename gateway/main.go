@@ -87,6 +87,8 @@ func Start(ctx *cli.Context) {
 		rpc.FileModelName: fileModelUri,
 	})
 
+	//rpc.TestInitES()
+
 	inotify.WatchPath(watchDir)
 	go inotify.VectorCli.Run()
 	contx := context.Background()
