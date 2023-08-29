@@ -15,9 +15,9 @@ import (
 	"wzinc/parser"
 	"wzinc/rpc"
 
-	//"bytetrade.io/web3os/fs-lib/jfsnotify"
+	"bytetrade.io/web3os/fs-lib/jfsnotify"
 
-	jfsnotify "github.com/fsnotify/fsnotify"
+	//jfsnotify "github.com/fsnotify/fsnotify"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
@@ -27,7 +27,7 @@ var watcher *jfsnotify.Watcher
 func WatchPath(path string) {
 	// Create a new watcher.
 	var err error
-	watcher, err = jfsnotify.NewWatcher() // ("myWatcher")
+	watcher, err = jfsnotify.NewWatcher("myWatcher")
 	if err != nil {
 		panic(err)
 	}
