@@ -55,7 +55,7 @@ func Start(ctx *cli.Context) {
 	if url == "" {
 		zinc_host := os.Getenv("ZINC_HOST")
 		zinc_port := os.Getenv("ZINC_PORT")
-		url = zinc_host + ":" + zinc_port
+		url = "http://" + zinc_host + ":" + zinc_port
 		if zinc_host == "" || zinc_port == "" {
 			url = "http://localhost:4080"
 		}
