@@ -6,6 +6,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	selfdriving "wzinc/ai/self-driving"
@@ -36,8 +37,8 @@ var SessionCookieName = "session_id"
 
 var Host = "127.0.0.1"
 
-const FileIndex = "Files"
-const RssIndex = "Rss"
+var FileIndex = os.Getenv("ZINC_INDEX_FILES") //"Files"
+var RssIndex = os.Getenv("ZINC_INDEX_RSS")    //"Rss"
 const DefaultMaxResult = 10
 
 var once sync.Once
