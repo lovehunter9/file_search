@@ -198,6 +198,7 @@ func (s *Service) EsSetupIndex() error {
 	}
 
 	for _, indexName := range expectIndexList {
+		fmt.Println(indexName)
 		//检查索引是否存在
 		exists, err := s.esClient.Indices.Exists(indexName).IsSuccess(s.context)
 		if err != nil {

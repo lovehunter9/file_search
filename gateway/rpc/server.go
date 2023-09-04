@@ -73,6 +73,7 @@ func InitRpcService(url, port, username, password string, bsModelConfig map[stri
 		esClient, _ := InitES(url, username, password)
 		ctxTemp := context.WithValue(context.Background(), "Username", username)
 		ctx := context.WithValue(ctxTemp, "Password", password)
+		fmt.Println(username, password)
 
 		RpcServer = &Service{
 			port:             port,
