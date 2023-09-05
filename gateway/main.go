@@ -76,8 +76,8 @@ func Start(ctx *cli.Context) {
 	if password == "" {
 		password = "User#123"
 	}
-	chatModelUri := os.Getenv("CHAT_MODEL_URI")
-	fileModelUri := os.Getenv("FILE_MODEL_URI")
+	//chatModelUri := os.Getenv("CHAT_MODEL_URI")
+	//fileModelUri := os.Getenv("FILE_MODEL_URI")
 	mongoUri := os.Getenv("MONGO_URI")
 	if mongoUri != "" {
 		db.MongoURI = mongoUri
@@ -88,8 +88,8 @@ func Start(ctx *cli.Context) {
 	db.Init()
 
 	rpc.InitRpcService(url, port, username, password, map[string]string{
-		rpc.ChatModelName: chatModelUri,
-		rpc.FileModelName: fileModelUri,
+		//rpc.ChatModelName: chatModelUri,
+		//rpc.FileModelName: fileModelUri,
 	})
 
 	//rpc.TestInitES()
