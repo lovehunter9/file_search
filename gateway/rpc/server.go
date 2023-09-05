@@ -164,6 +164,12 @@ func (c *Service) loadRoutes() error { // ctx context.Context) error {
 
 func (s *Service) HandleInput(c *gin.Context) {
 	index := c.Query("index")
+	if index == "Files" {
+		index = FileIndex
+	}
+	if index == "Rss" {
+		index = RssIndex
+	}
 	if index != FileIndex && index != RssIndex {
 		rep := Resp{
 			ResultCode: ErrorCodeUnknow,
@@ -181,6 +187,12 @@ func (s *Service) HandleInput(c *gin.Context) {
 
 func (s *Service) HandleDelete(c *gin.Context) {
 	index := c.Query("index")
+	if index == "Files" {
+		index = FileIndex
+	}
+	if index == "Rss" {
+		index = RssIndex
+	}
 	if index != FileIndex && index != RssIndex {
 		rep := Resp{
 			ResultCode: ErrorCodeUnknow,
@@ -198,6 +210,12 @@ func (s *Service) HandleDelete(c *gin.Context) {
 
 func (s *Service) HandleQuery(c *gin.Context) {
 	index := c.Query("index")
+	if index == "Files" {
+		index = FileIndex
+	}
+	if index == "Rss" {
+		index = RssIndex
+	}
 	if index != FileIndex && index != RssIndex {
 		rep := Resp{
 			ResultCode: ErrorCodeUnknow,
