@@ -4,17 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 	"sync"
-	selfdriving "wzinc/ai/self-driving"
-	"wzinc/common"
-
-	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
-	zinc "github.com/zinclabs/sdk-go-zincsearch"
 )
 
 const InternalError = "internal server error"
@@ -48,42 +44,42 @@ var RpcServer *Service
 var maxPendingLength = 30
 
 type Service struct {
-	port             string
-	zincUrl          string
-	username         string
-	password         string
-	esClient         *elasticsearch.TypedClient
-	apiClient        *zinc.APIClient
-	context          context.Context
-	bsApiClient      map[string]*selfdriving.Client //modelname -> client
-	questionCh       chan (common.PendingQuestion)
+	port     string
+	zincUrl  string
+	username string
+	password string
+	esClient *elasticsearch.TypedClient
+	//apiClient        *zinc.APIClient
+	context context.Context
+	//bsApiClient      map[string]*selfdriving.Client //modelname -> client
+	//questionCh       chan (common.PendingQuestion)
 	maxPendingLength int
 	CallbackGroup    *gin.RouterGroup
 }
 
 func InitRpcService(url, port, username, password string, bsModelConfig map[string]string) {
 	once.Do(func() {
-		configuration := zinc.NewConfiguration()
-		configuration.Servers = zinc.ServerConfigurations{
-			zinc.ServerConfiguration{
-				URL: url,
-			},
-		}
-		apiClient := zinc.NewAPIClient(configuration)
+		//configuration := zinc.NewConfiguration()
+		//configuration.Servers = zinc.ServerConfigurations{
+		//	zinc.ServerConfiguration{
+		//		URL: url,
+		//	},
+		//}
+		//apiClient := zinc.NewAPIClient(configuration)
 		esClient, _ := InitES(url, username, password)
 		ctxTemp := context.WithValue(context.Background(), "Username", username)
 		ctx := context.WithValue(ctxTemp, "Password", password)
 
 		RpcServer = &Service{
-			port:             port,
-			zincUrl:          url,
-			username:         username,
-			password:         password,
-			apiClient:        apiClient,
-			esClient:         esClient,
-			context:          ctx,
-			bsApiClient:      make(map[string]*selfdriving.Client),
-			questionCh:       make(chan common.PendingQuestion),
+			port:     port,
+			zincUrl:  url,
+			username: username,
+			password: password,
+			//apiClient:        apiClient,
+			esClient: esClient,
+			context:  ctx,
+			//bsApiClient:      make(map[string]*selfdriving.Client),
+			//questionCh:       make(chan common.PendingQuestion),
 			maxPendingLength: maxPendingLength,
 		}
 
@@ -97,13 +93,13 @@ func InitRpcService(url, port, username, password string, bsModelConfig map[stri
 		}
 
 		//load ai model
-		for modelName, url := range bsModelConfig {
-			log.Info().Msgf("init model name:%s url:%s", modelName, url)
-			RpcServer.bsApiClient[modelName] = selfdriving.NewClient(url, modelName, context.Background())
-		}
+		//for modelName, url := range bsModelConfig {
+		//	log.Info().Msgf("init model name:%s url:%s", modelName, url)
+		//	RpcServer.bsApiClient[modelName] = selfdriving.NewClient(url, modelName, context.Background())
+		//}
 
 		//load routes
-		RpcServer.loadRoutes(context.Background())
+		RpcServer.loadRoutes() // context.Background())
 	})
 }
 
@@ -132,10 +128,10 @@ func (c *Service) Start(ctx context.Context) error {
 	return nil
 }
 
-func (c *Service) loadRoutes(ctx context.Context) error {
+func (c *Service) loadRoutes() error { // ctx context.Context) error {
 	//start ai question service
-	postQuestionsContext, _ := context.WithCancel(ctx)
-	go c.StartChatService(postQuestionsContext)
+	//postQuestionsContext, _ := context.WithCancel(ctx)
+	//go c.StartChatService(postQuestionsContext)
 
 	//start gin
 	gin.DefaultWriter = &LoggerMy{}
@@ -151,7 +147,7 @@ func (c *Service) loadRoutes(ctx context.Context) error {
 	RpcEngine.POST("/api/delete", c.HandleDelete)
 	RpcEngine.POST("/api/query", c.HandleQuery)
 
-	RpcEngine.POST("/api/ai/question", c.HandleQuestion)
+	//RpcEngine.POST("/api/ai/question", c.HandleQuestion)
 	RpcEngine.POST("/api/ai/fake/callback", func(c *gin.Context) {
 		b, err := ioutil.ReadAll(c.Request.Body)
 		if err != nil {

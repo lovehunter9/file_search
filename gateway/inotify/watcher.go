@@ -17,8 +17,6 @@ import (
 
 	"bytetrade.io/web3os/fs-lib/jfsnotify"
 
-	//jfsnotify "github.com/fsnotify/fsnotify"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -133,15 +131,15 @@ func dedupLoop(w *jfsnotify.Watcher) {
 func handleEvent(e jfsnotify.Event) error {
 	if e.Has(jfsnotify.Remove) || e.Has(jfsnotify.Rename) {
 		log.Info().Msgf("push indexer task delete %s", e.Name)
-		VectorCli.fsTask <- VectorDBTask{
-			Filename:  path.Base(e.Name),
-			Filepath:  e.Name,
-			IsInsert:  false,
-			Action:    DeleteAction,
-			TaskId:    uuid.NewString(),
-			StartTime: time.Now().Unix(),
-			FileId:    fileId(e.Name),
-		}
+		//VectorCli.fsTask <- VectorDBTask{
+		//	Filename:  path.Base(e.Name),
+		//	Filepath:  e.Name,
+		//	IsInsert:  false,
+		//	Action:    DeleteAction,
+		//	TaskId:    uuid.NewString(),
+		//	StartTime: time.Now().Unix(),
+		//	FileId:    fileId(e.Name),
+		//}
 		res, err := rpc.RpcServer.EsQueryByPath(rpc.FileIndex, e.Name)
 		if err != nil {
 			return err
@@ -231,15 +229,15 @@ func updateOrInputDoc(filepath string) error {
 			fileType := parser.GetTypeFromName(filepath)
 			if _, ok := parser.ParseAble[fileType]; ok {
 				log.Info().Msgf("push indexer task insert %s", filepath)
-				VectorCli.fsTask <- VectorDBTask{
-					Filename:  path.Base(filepath),
-					Filepath:  filepath,
-					IsInsert:  true,
-					Action:    AddAction,
-					TaskId:    uuid.NewString(),
-					StartTime: time.Now().Unix(),
-					FileId:    fileId(filepath),
-				}
+				//VectorCli.fsTask <- VectorDBTask{
+				//	Filename:  path.Base(filepath),
+				//	Filepath:  filepath,
+				//	IsInsert:  true,
+				//	Action:    AddAction,
+				//	TaskId:    uuid.NewString(),
+				//	StartTime: time.Now().Unix(),
+				//	FileId:    fileId(filepath),
+				//}
 				content, err := parser.ParseDoc(bytes.NewReader(b), filepath)
 				if err != nil {
 					return err
@@ -271,15 +269,15 @@ func updateOrInputDoc(filepath string) error {
 	content := ""
 	if _, ok := parser.ParseAble[fileType]; ok {
 		log.Info().Msgf("push indexer task insert %s", filepath)
-		VectorCli.fsTask <- VectorDBTask{
-			Filename:  path.Base(filepath),
-			Filepath:  filepath,
-			IsInsert:  true,
-			Action:    AddAction,
-			TaskId:    uuid.NewString(),
-			StartTime: time.Now().Unix(),
-			FileId:    fileId(filepath),
-		}
+		//VectorCli.fsTask <- VectorDBTask{
+		//	Filename:  path.Base(filepath),
+		//	Filepath:  filepath,
+		//	IsInsert:  true,
+		//	Action:    AddAction,
+		//	TaskId:    uuid.NewString(),
+		//	StartTime: time.Now().Unix(),
+		//	FileId:    fileId(filepath),
+		//}
 		content, err = parser.ParseDoc(bytes.NewBuffer(b), filepath)
 		if err != nil {
 			return err
