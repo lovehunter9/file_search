@@ -299,7 +299,7 @@ func (s *Service) QueryFile(c *gin.Context) {
 	fmt.Println(token)
 	fmt.Println(token.Data)
 	PrintStruct(token)
-	PrintStruct(token.Data)
+	PrintStruct(*token.Data)
 
 	req := c.Request
 	// 解析表单数据
@@ -307,7 +307,7 @@ func (s *Service) QueryFile(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse form data"})
 		return
 	}
-	
+
 	// 添加index字段
 	if token.Data.Index != "" {
 		fmt.Println(token.Data.Index)
