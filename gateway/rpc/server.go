@@ -147,6 +147,8 @@ func (c *Service) loadRoutes() error { // ctx context.Context) error {
 	RpcEngine.POST("/api/delete", c.HandleDelete)
 	RpcEngine.POST("/api/query", c.HandleQuery)
 	RpcEngine.POST("/add_rss", c.HandleRssInput)
+	RpcEngine.POST("/query_file", c.HandleFileQuery)
+	RpcEngine.POST("/remove_rss", c.HandleRssDelete)
 
 	//RpcEngine.POST("/api/ai/question", c.HandleQuestion)
 	RpcEngine.POST("/api/ai/fake/callback", func(c *gin.Context) {
