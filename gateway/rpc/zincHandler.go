@@ -257,12 +257,12 @@ func shortFileQueryResult(res FileQueryResult) FileQueryItem {
 }
 
 type ProviderRequest struct {
-	Op       string                 `json:"op"`
-	DataType string                 `json:"datatype"`
-	Version  string                 `json:"version"`
-	Group    string                 `json:"group"`
-	Token    string                 `json:"token"`
-	Data     FileSearchQueryRequest `json:"data"`
+	Op       string                  `json:"op"`
+	DataType string                  `json:"datatype"`
+	Version  string                  `json:"version"`
+	Group    string                  `json:"group"`
+	Token    string                  `json:"token"`
+	Data     *FileSearchQueryRequest `json:"data"`
 }
 
 type FileSearchQueryRequest struct {
@@ -301,32 +301,33 @@ func (s *Service) QueryFile(c *gin.Context) {
 	PrintStruct(token)
 	PrintStruct(token.Data)
 
+	req := c.Request
 	// 添加index字段
 	if token.Data.Index != "" {
 		fmt.Println(token.Data.Index)
-		c.Request.PostForm.Set("index", token.Data.Index)
+		req.PostForm.Set("index", token.Data.Index)
 	}
 
 	// 添加query字段
 	if token.Data.Query != "" {
 		fmt.Println(token.Data.Query)
-		c.Request.PostForm.Set("query", token.Data.Query)
+		req.PostForm.Set("query", token.Data.Query)
 	}
 
 	// 添加limit字段
 	if token.Data.Limit != 0 {
 		fmt.Println(token.Data.Limit)
-		c.Request.PostForm.Set("limit", strconv.Itoa(token.Data.Limit))
+		req.PostForm.Set("limit", strconv.Itoa(token.Data.Limit))
 	}
 
 	// 添加offset字段
 	if token.Data.Offset != 0 {
 		fmt.Println(token.Data.Offset)
-		c.Request.PostForm.Set("offset", strconv.Itoa(token.Data.Offset))
+		req.PostForm.Set("offset", strconv.Itoa(token.Data.Offset))
 	}
 
 	// 解析表单数据
-	if err := c.Request.ParseForm(); err != nil {
+	if err := req.ParseForm(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse form data"})
 		return
 	}
