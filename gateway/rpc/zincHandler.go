@@ -332,7 +332,7 @@ func (s *Service) QueryFile(c *gin.Context) {
 		req.PostForm.Set("offset", strconv.Itoa(token.Data.Offset))
 	}
 
-	s.HandleQuery(c)
+	s.HandleFileQuery(c)
 	//// 发送请求并获取响应
 	//client := &http.Client{}
 	//req, err := http.NewRequest(http.MethodPost, "/api/query?index=Files", nil)
