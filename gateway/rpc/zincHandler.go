@@ -254,3 +254,72 @@ func shortFileQueryResult(res FileQueryResult) FileQueryItem {
 		Snippet:  snippet,
 	}
 }
+
+type ProviderRequest struct {
+	Data FileSearchQueryRequest `json:"data"`
+}
+
+type FileSearchQueryRequest struct {
+	Index  string `json:"index"`
+	Query  string `json:"query"`
+	Limit  int    `json:"limit"`
+	Offset int    `json:"offset"`
+}
+
+func (s *Service) QueryFile(c *gin.Context) {
+	token := ProviderRequest{}
+	if err := c.ShouldBindJSON(&token); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request body"})
+		return
+	}
+
+	fmt.Println("query_file")
+	fmt.Println(token.Data)
+
+	// 添加index字段
+	if token.Data.Index != "" {
+		c.Request.Form.Set("index", token.Data.Index)
+	}
+
+	// 添加query字段
+	if token.Data.Query != "" {
+		c.Request.Form.Set("query", token.Data.Query)
+	}
+
+	// 添加limit字段
+	if token.Data.Limit != 0 {
+		c.Request.Form.Set("limit", strconv.Itoa(token.Data.Limit))
+	}
+
+	// 解析表单数据
+	if err := c.Request.ParseForm(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse form data"})
+		return
+	}
+
+	s.HandleFileQuery(c)
+	//// 发送请求并获取响应
+	//client := &http.Client{}
+	//req, err := http.NewRequest(http.MethodPost, "/api/query?index=Files", nil)
+	//if err != nil {
+	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+	//	return
+	//}
+	//req.Form = c.Request.Form
+	//resp, err := client.Do(req)
+	//if err != nil {
+	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send request"})
+	//	return
+	//}
+	//defer resp.Body.Close()
+	//
+	//// 处理响应
+	//var buf bytes.Buffer
+	//_, err = io.Copy(&buf, resp.Body)
+	//if err != nil {
+	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
+	//	return
+	//}
+	//
+	//c.Data(http.StatusOK, "application/json", buf.Bytes())
+}
