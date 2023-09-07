@@ -285,16 +285,19 @@ func (s *Service) QueryFile(c *gin.Context) {
 
 	// 添加index字段
 	if token.Data.Index != "" {
+		fmt.Println(token.Data.Index)
 		c.Request.Form.Set("index", token.Data.Index)
 	}
 
 	// 添加query字段
 	if token.Data.Query != "" {
+		fmt.Println(token.Data.Query)
 		c.Request.Form.Set("query", token.Data.Query)
 	}
 
 	// 添加limit字段
 	if token.Data.Limit != 0 {
+		fmt.Println(token.Data.Limit)
 		c.Request.Form.Set("limit", strconv.Itoa(token.Data.Limit))
 	}
 
