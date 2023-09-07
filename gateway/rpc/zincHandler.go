@@ -302,6 +302,12 @@ func (s *Service) QueryFile(c *gin.Context) {
 	PrintStruct(token.Data)
 
 	req := c.Request
+	// 解析表单数据
+	if err := req.ParseForm(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse form data"})
+		return
+	}
+	
 	// 添加index字段
 	if token.Data.Index != "" {
 		fmt.Println(token.Data.Index)
@@ -324,12 +330,6 @@ func (s *Service) QueryFile(c *gin.Context) {
 	if token.Data.Offset != 0 {
 		fmt.Println(token.Data.Offset)
 		req.PostForm.Set("offset", strconv.Itoa(token.Data.Offset))
-	}
-
-	// 解析表单数据
-	if err := req.ParseForm(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse form data"})
-		return
 	}
 
 	s.HandleQuery(c)
