@@ -272,7 +272,9 @@ type FileSearchQueryRequest struct {
 }
 
 func (s *Service) QueryFile(c *gin.Context) {
-	token := ProviderRequest{}
+	token := ProviderRequest{
+		Token: c.GetHeader("X-Access-Token"),
+	}
 	if err := c.ShouldBindJSON(&token); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request body"})
 		return
