@@ -308,11 +308,11 @@ func (s *Service) QueryFile(c *gin.Context) {
 	PrintStruct(token)
 	PrintStruct(token.Data)
 
-	// 添加index字段
-	if token.Data.Index != "" {
-		fmt.Println(token.Data.Index)
-		c.Request.Form.Set("index", string(token.Data.Index))
-	}
+	//// 添加index字段
+	//if token.Data.Index != "" {
+	//	fmt.Println(token.Data.Index)
+	//	c.Request.Form.Set("index", string(token.Data.Index))
+	//}
 
 	// 添加query字段
 	if token.Data.Query != "" {
@@ -324,6 +324,12 @@ func (s *Service) QueryFile(c *gin.Context) {
 	if token.Data.Limit != 0 {
 		fmt.Println(token.Data.Limit)
 		c.Request.Form.Set("limit", strconv.Itoa(token.Data.Limit))
+	}
+
+	// 添加offset字段
+	if token.Data.Offset != 0 {
+		fmt.Println(token.Data.Offset)
+		c.Request.Form.Set("offset", strconv.Itoa(token.Data.Offset))
 	}
 
 	// 解析表单数据
