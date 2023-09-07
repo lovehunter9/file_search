@@ -265,18 +265,11 @@ type ProviderRequest struct {
 	Data     FileSearchQueryRequest `json:"data"`
 }
 
-type FileSearchIndexName string
-
-const (
-	Terminus FileSearchIndexName = "terminus"
-	Rss      FileSearchIndexName = "rss"
-)
-
 type FileSearchQueryRequest struct {
-	Index  FileSearchIndexName `json:"index"`
-	Query  string              `json:"query"`
-	Limit  int                 `json:"limit"`
-	Offset int                 `json:"offset"`
+	Index  string `json:"index"`
+	Query  string `json:"query"`
+	Limit  int    `json:"limit"`
+	Offset int    `json:"offset"`
 }
 
 func PrintStruct(s interface{}) {
@@ -308,28 +301,28 @@ func (s *Service) QueryFile(c *gin.Context) {
 	PrintStruct(token)
 	PrintStruct(token.Data)
 
-	//// 添加index字段
-	//if token.Data.Index != "" {
-	//	fmt.Println(token.Data.Index)
-	//	c.Request.Form.Set("index", string(token.Data.Index))
-	//}
+	// 添加index字段
+	if token.Data.Index != "" {
+		fmt.Println(token.Data.Index)
+		c.Request.PostForm.Set("index", token.Data.Index)
+	}
 
 	// 添加query字段
 	if token.Data.Query != "" {
 		fmt.Println(token.Data.Query)
-		c.Request.Form.Set("query", token.Data.Query)
+		c.Request.PostForm.Set("query", token.Data.Query)
 	}
 
 	// 添加limit字段
 	if token.Data.Limit != 0 {
 		fmt.Println(token.Data.Limit)
-		c.Request.Form.Set("limit", strconv.Itoa(token.Data.Limit))
+		c.Request.PostForm.Set("limit", strconv.Itoa(token.Data.Limit))
 	}
 
 	// 添加offset字段
 	if token.Data.Offset != 0 {
 		fmt.Println(token.Data.Offset)
-		c.Request.Form.Set("offset", strconv.Itoa(token.Data.Offset))
+		c.Request.PostForm.Set("offset", strconv.Itoa(token.Data.Offset))
 	}
 
 	// 解析表单数据
