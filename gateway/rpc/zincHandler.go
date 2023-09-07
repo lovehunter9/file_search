@@ -256,7 +256,12 @@ func shortFileQueryResult(res FileQueryResult) FileQueryItem {
 }
 
 type ProviderRequest struct {
-	Data FileSearchQueryRequest `json:"data"`
+	Op       string                 `json:"op"`
+	DataType string                 `json:"datatype"`
+	Version  string                 `json:"version"`
+	Group    string                 `json:"group"`
+	Token    string                 `json:"token"`
+	Data     FileSearchQueryRequest `json:"data"`
 }
 
 type FileSearchQueryRequest struct {
@@ -297,7 +302,7 @@ func (s *Service) QueryFile(c *gin.Context) {
 		return
 	}
 
-	s.HandleFileQuery(c)
+	s.HandleQuery(c)
 	//// 发送请求并获取响应
 	//client := &http.Client{}
 	//req, err := http.NewRequest(http.MethodPost, "/api/query?index=Files", nil)
