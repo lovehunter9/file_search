@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"reflect"
 	"strconv"
 	"time"
 	"wzinc/common"
@@ -278,6 +279,20 @@ type FileSearchQueryRequest struct {
 	Offset int                 `json:"offset"`
 }
 
+func PrintStruct(s interface{}) {
+	v := reflect.ValueOf(s)
+	t := v.Type()
+
+	fmt.Printf("Struct: %s\n", t.Name())
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i)
+
+		fmt.Printf("%s: %v\n", field.Name, value.Interface())
+	}
+}
+
 func (s *Service) QueryFile(c *gin.Context) {
 	token := ProviderRequest{
 		Token: c.GetHeader("X-Access-Token"),
@@ -288,7 +303,10 @@ func (s *Service) QueryFile(c *gin.Context) {
 	}
 
 	fmt.Println("query_file")
+	fmt.Println(token)
 	fmt.Println(token.Data)
+	PrintStruct(token)
+	PrintStruct(token.Data)
 
 	// 添加index字段
 	if token.Data.Index != "" {
