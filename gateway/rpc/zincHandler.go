@@ -264,11 +264,18 @@ type ProviderRequest struct {
 	Data     FileSearchQueryRequest `json:"data"`
 }
 
+type FileSearchIndexName string
+
+const (
+	Terminus FileSearchIndexName = "terminus"
+	Rss      FileSearchIndexName = "rss"
+)
+
 type FileSearchQueryRequest struct {
-	Index  string `json:"index"`
-	Query  string `json:"query"`
-	Limit  int    `json:"limit"`
-	Offset int    `json:"offset"`
+	Index  FileSearchIndexName `json:"index"`
+	Query  string              `json:"query"`
+	Limit  int                 `json:"limit"`
+	Offset int                 `json:"offset"`
 }
 
 func (s *Service) QueryFile(c *gin.Context) {
@@ -286,7 +293,7 @@ func (s *Service) QueryFile(c *gin.Context) {
 	// 添加index字段
 	if token.Data.Index != "" {
 		fmt.Println(token.Data.Index)
-		c.Request.Form.Set("index", token.Data.Index)
+		c.Request.Form.Set("index", string(token.Data.Index))
 	}
 
 	// 添加query字段
